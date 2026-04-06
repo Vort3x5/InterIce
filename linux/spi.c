@@ -15,7 +15,7 @@ static ssize_t x_store(struct kobject *kobj, struct kobj_attribute *attr, const 
     u8 *tx;
     int actual;
     if (!udev) return -ENODEV;
-    if (kstrtou32(buf, 10, &val) < 0) return -EINVAL;
+    if (kstrtou32(buf, 0, &val) < 0) return -EINVAL;
 
     tx = kmalloc(32, GFP_KERNEL);
     if (!tx) return -ENOMEM;
@@ -23,9 +23,11 @@ static ssize_t x_store(struct kobject *kobj, struct kobj_attribute *attr, const 
     tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B;
     tx[3] = 0x11; tx[4] = 0x03; tx[5] = 0x00;
     tx[6] = 0x02; tx[7] = (val >> 16) & 0xFF; tx[8] = (val >> 8) & 0xFF; tx[9] = val & 0xFF;
-    tx[10] = 0x80; tx[11] = 0x08; tx[12] = 0x0B;
+    tx[10] = 0x87; 
+    tx[11] = 0x80; tx[12] = 0x08; tx[13] = 0x0B;
+    tx[14] = 0x87; 
     
-    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 13, &actual, 1000);
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 15, &actual, 1000);
     kfree(tx);
     return count;
 }
@@ -41,9 +43,11 @@ static ssize_t ctrl_store(struct kobject *kobj, struct kobj_attribute *attr, con
     tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B;
     tx[3] = 0x11; tx[4] = 0x01; tx[5] = 0x00;
     tx[6] = 0x04; tx[7] = 0x01;
-    tx[8] = 0x80; tx[9] = 0x08; tx[10] = 0x0B;
+    tx[8] = 0x87; 
+    tx[9] = 0x80; tx[10] = 0x08; tx[11] = 0x0B;
+    tx[12] = 0x87; 
     
-    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 11, &actual, 1000);
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 13, &actual, 1000);
     kfree(tx);
     return count;
 }
@@ -53,6 +57,7 @@ static ssize_t y_show(struct kobject *kobj, struct kobj_attribute *attr, char *b
     u32 val = 0;
     int actual, ret, i;
     int payload_len = 0;
+    int tries = 0;
     u8 payload[4] = {0};
 
     if (!udev) return -ENODEV;
@@ -73,12 +78,13 @@ static ssize_t y_show(struct kobject *kobj, struct kobj_attribute *attr, char *b
     tx[3] = 0x11; tx[4] = 0x00; tx[5] = 0x00; tx[6] = 0x09;
     tx[7] = 0x20; tx[8] = 0x03; tx[9] = 0x00; tx[10] = 0x87;
     tx[11] = 0x80; tx[12] = 0x08; tx[13] = 0x0B;
+    tx[14] = 0x87;
     
-    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 14, &actual, 1000);
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 15, &actual, 1000);
 
-    while (payload_len < 4) {
-        ret = usb_bulk_msg(udev, usb_rcvbulkpipe(udev, 3), rx, 512, &actual, 1000);
-        if (ret || actual < 2) break;
+    while (payload_len < 4 && tries++ < 20) {
+        ret = usb_bulk_msg(udev, usb_rcvbulkpipe(udev, 3), rx, 512, &actual, 100);
+        if (ret || actual < 2) continue;
         
         for (i = 2; i < actual && payload_len < 4; i++) {
             payload[payload_len++] = rx[i];
@@ -86,7 +92,7 @@ static ssize_t y_show(struct kobject *kobj, struct kobj_attribute *attr, char *b
     }
 
     if (payload_len == 4) {
-        val = ((payload[0] << 24) | (payload[1] << 16) | (payload[2] << 8) | payload[3]) >> 7;
+        val = (((u32)payload[0] << 24) | ((u32)payload[1] << 16) | ((u32)payload[2] << 8) | (u32)payload[3]) >> 7;
     }
 
     kfree(tx); 
