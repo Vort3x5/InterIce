@@ -17,4 +17,4 @@ prog: $(TARGET).bin
 	iceprog $(TARGET).bin
 
 clean:
-	rm -f *.json *.asc *.bin
+	rm -f *.json *.asc *.bin main

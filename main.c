@@ -4,68 +4,65 @@
 #include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
+#include <sys/ioctl.h>
+#include <time.h>
 
-// Ułamek x w domenie u1.23: przedział [0, 2)
+struct quadra_batch {
+    uint32_t count;
+    uint32_t *x_in;
+    uint32_t *y_out;
+};
+#define QUADRA_IOC_BATCH _IOWR('q', 1, struct quadra_batch)
+
 #define X_MAX (1 << 24)
-// Skok iteracji: 4096 minimalizuje czas wykonania (4096 próbek sprzętowych)
-#define X_STEP 4096
+#define COUNT 4096
+#define X_STEP (X_MAX / COUNT)
 
 int main() {
-    int fd_x = open("/sys/kernel/sykt_sysfs/dsskma", O_WRONLY);
-    int fd_ctrl = open("/sys/kernel/sykt_sysfs/dtskma", O_WRONLY);
-    int fd_y = open("/sys/kernel/sykt_sysfs/drskma", O_RDONLY);
-
-    if (fd_x < 0 || fd_ctrl < 0 || fd_y < 0) {
-        perror("Błąd otwarcia węzłów sysfs");
+    int fd = open("/dev/quadra", O_RDWR);
+    if (fd < 0) {
+        perror("Błąd warstwy jądra - brak węzła /dev/quadra");
         return 1;
     }
 
-    char buf[32];
-    double max_err = 0.0;
-    int samples = 0;
-    
-    printf("x_raw,x_float,y_hw_raw,y_hw_float,y_ref,err\n");
+    uint32_t *x_buf = malloc(COUNT * sizeof(uint32_t));
+    uint32_t *y_buf = malloc(COUNT * sizeof(uint32_t));
 
-    for (uint32_t x_raw = 0; x_raw < X_MAX; x_raw += X_STEP) {
-        // Zapis argumentu X (format dziesiętny do sysfs)
-        int len = snprintf(buf, sizeof(buf), "%u\n", x_raw);
-        pwrite(fd_x, buf, len, 0);
-
-        // Wyzwolenie cyklu sprzętowego (start = 1)
-        pwrite(fd_ctrl, "1\n", 2, 0);
-
-        // Odczyt wyniku Y
-        memset(buf, 0, sizeof(buf));
-        pread(fd_y, buf, sizeof(buf)-1, 0);
-        uint32_t y_raw = strtoul(buf, NULL, 10);
-
-        // Transformacja stałoprzecinkowa u1.23 dla X
-        double x_float = (double)x_raw / (1 << 23);
-        
-        // Transformacja stałoprzecinkowa s2.23 dla Y (25-bitowy znak)
-        int32_t y_signed = y_raw;
-        if (y_signed & (1 << 24)) {
-            y_signed -= (1 << 25);
-        }
-        double y_hw_float = (double)y_signed / (1 << 23);
-
-        // Złoty model matematyczny (referencja CPU)
-        double y_ref = sin(2.0 * x_float - M_PI / 4.0);
-        
-        // Kwantyfikacja błędu bezwzględnego
-        double err = fabs(y_hw_float - y_ref);
-        if (err > max_err) max_err = err;
-        samples++;
-
-        printf("%u,%.6f,%u,%.6f,%.6f,%.6e\n", x_raw, x_float, y_raw, y_hw_float, y_ref, err);
+    for (int i = 0; i < COUNT; i++) {
+        x_buf[i] = i * X_STEP;
     }
 
-    fprintf(stderr, "Przetworzono próbek: %d\n", samples);
-    fprintf(stderr, "Maksymalny błąd bezwzględny (odchylenie sprzętowe LUT): %.6e\n", max_err);
+    struct quadra_batch batch = { .count = COUNT, .x_in = x_buf, .y_out = y_buf };
+    struct timespec start, end;
+    
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    if (ioctl(fd, QUADRA_IOC_BATCH, &batch) < 0) {
+        perror("Zrzut strumieniowy przerwany");
+        return 1;
+    }
+    clock_gettime(CLOCK_MONOTONIC, &end);
 
-    close(fd_x);
-    close(fd_ctrl);
-    close(fd_y);
+    double time_taken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    double max_err = 0.0;
+
+    for (int i = 0; i < COUNT; i++) {
+        double x_float = (double)x_buf[i] / (1 << 23);
+        int32_t y_signed = y_buf[i];
+        if (y_signed & (1 << 24)) y_signed -= (1 << 25);
+        
+        double y_hw_float = (double)y_signed / (1 << 23);
+        double y_ref = sin(2.0 * x_float - M_PI / 4.0);
+        
+        double err = fabs(y_hw_float - y_ref);
+        if (err > max_err) max_err = err;
+    }
+
+    printf("Ewaluacja wsadowa: %d probek\n", COUNT);
+    printf("Czas propagacji magistrali: %.4f s (%.0f probek/s)\n", time_taken, COUNT / time_taken);
+    printf("Szczytowy blad kwantyzacji: %.6e\n", max_err);
+
+    free(x_buf);
+    free(y_buf);
+    close(fd);
     return 0;
 }
