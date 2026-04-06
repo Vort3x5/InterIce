@@ -1,4 +1,4 @@
-`include "quadra.vh"
+`include "quadra.svh"
 
 module quadra
 (

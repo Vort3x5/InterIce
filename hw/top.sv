@@ -26,11 +26,15 @@ module top (
     );
 
     quadra quadra_inst (
-        .clk(clk),
-        .rst(rst),
-        .x(x_data),
-        .x_dv(start),
-        .y(y_data),
-        .y_dv(done)
+        .x_in(x_data),
+        .y_out(y_data)
     );
+
+    always_ff @(posedge clk) begin
+        if (rst) 
+            done <= 0;
+        else 
+            done <= start;
+    end
+
 endmodule
