@@ -45,11 +45,11 @@ module spi_slave (
                     addr <= shift_reg[7:1];
                     rw   <= shift_reg[0];
                     if (shift_reg[0] && shift_reg[7:1] == 7'h04) begin
-                        shift_reg <= {7'd0, y_in};
-                        miso <= 0;
+                        shift_reg <= {y_in, 7'd0}; 
+                        miso <= y_in[24];
                     end else if (shift_reg[0] && shift_reg[7:1] == 7'h03) begin
-                        shift_reg <= {31'd0, done_in};
-                        miso <= 0;
+                        shift_reg <= {done_in, 31'd0};
+                        miso <= done_in;
                     end else begin
                         miso <= shift_reg[31];
                     end

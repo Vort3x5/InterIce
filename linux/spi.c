@@ -10,84 +10,89 @@
 static struct usb_device *udev = NULL;
 static struct kobject *sykt_kobj;
 
-static int send_mpsse(u8 *cmd, int len) {
-    int actual;
-    return usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), cmd, len, &actual, 1000);
-}
-
-static int read_mpsse(u8 *cmd, int cmd_len, u8 *rx, int rx_len) {
-    int actual;
-    int ret = usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), cmd, cmd_len, &actual, 1000);
-    if (ret) return ret;
-    return usb_bulk_msg(udev, usb_rcvbulkpipe(udev, 3), rx, rx_len, &actual, 1000);
-}
-
 static ssize_t x_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count) {
     u32 val;
     u8 *tx;
+    int actual;
     if (!udev) return -ENODEV;
     if (kstrtou32(buf, 10, &val) < 0) return -EINVAL;
 
-    tx = kmalloc(16, GFP_KERNEL);
+    tx = kmalloc(32, GFP_KERNEL);
     if (!tx) return -ENOMEM;
 
     tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B;
-    send_mpsse(tx, 3);
-
-    tx[0] = 0x11; tx[1] = 0x03; tx[2] = 0x00;
-    tx[3] = 0x02; tx[4] = (val >> 16) & 0xFF; tx[5] = (val >> 8) & 0xFF; tx[6] = val & 0xFF;
-    send_mpsse(tx, 7);
-
-    tx[0] = 0x80; tx[1] = 0x08; tx[2] = 0x0B;
-    send_mpsse(tx, 3);
-
+    tx[3] = 0x11; tx[4] = 0x03; tx[5] = 0x00;
+    tx[6] = 0x02; tx[7] = (val >> 16) & 0xFF; tx[8] = (val >> 8) & 0xFF; tx[9] = val & 0xFF;
+    tx[10] = 0x80; tx[11] = 0x08; tx[12] = 0x0B;
+    
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 13, &actual, 1000);
     kfree(tx);
     return count;
 }
 
 static ssize_t ctrl_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count) {
     u8 *tx;
+    int actual;
     if (!udev) return -ENODEV;
 
-    tx = kmalloc(16, GFP_KERNEL);
+    tx = kmalloc(32, GFP_KERNEL);
     if (!tx) return -ENOMEM;
 
-    tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B; send_mpsse(tx, 3);
-    tx[0] = 0x11; tx[1] = 0x01; tx[2] = 0x00; tx[3] = 0x04; tx[4] = 0x01; send_mpsse(tx, 5);
-    tx[0] = 0x80; tx[1] = 0x08; tx[2] = 0x0B; send_mpsse(tx, 3);
-
+    tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B;
+    tx[3] = 0x11; tx[4] = 0x01; tx[5] = 0x00;
+    tx[6] = 0x04; tx[7] = 0x01;
+    tx[8] = 0x80; tx[9] = 0x08; tx[10] = 0x0B;
+    
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 11, &actual, 1000);
     kfree(tx);
     return count;
 }
 
 static ssize_t y_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
     u8 *tx, *rx;
-    u32 val;
+    u32 val = 0;
+    int actual, ret, i;
+    int payload_len = 0;
+    u8 payload[4] = {0};
+
     if (!udev) return -ENODEV;
 
-    tx = kmalloc(16, GFP_KERNEL);
-    rx = kmalloc(16, GFP_KERNEL);
+    tx = kmalloc(512, GFP_KERNEL);
+    rx = kmalloc(512, GFP_KERNEL);
     if (!tx || !rx) {
         kfree(tx); kfree(rx);
         return -ENOMEM;
     }
 
-    tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B; 
-    send_mpsse(tx, 3);
+    for (i = 0; i < 10; i++) {
+        if (usb_bulk_msg(udev, usb_rcvbulkpipe(udev, 3), rx, 512, &actual, 5) != 0 || actual == 0) 
+            break;
+    }
 
-    tx[0] = 0x11; tx[1] = 0x00; tx[2] = 0x00; tx[3] = 0x09; 
-    send_mpsse(tx, 4);
-
-    tx[0] = 0x20; tx[1] = 0x03; tx[2] = 0x00; tx[3] = 0x87;
-    read_mpsse(tx, 4, rx, 6);
-
-    tx[0] = 0x80; tx[1] = 0x08; tx[2] = 0x0B; 
-    send_mpsse(tx, 3);
-
-    val = (rx[2] << 24) | (rx[3] << 16) | (rx[4] << 8) | rx[5];
+    tx[0] = 0x80; tx[1] = 0x00; tx[2] = 0x0B;
+    tx[3] = 0x11; tx[4] = 0x00; tx[5] = 0x00; tx[6] = 0x09;
+    tx[7] = 0x20; tx[8] = 0x03; tx[9] = 0x00; tx[10] = 0x87;
+    tx[11] = 0x80; tx[12] = 0x08; tx[13] = 0x0B;
     
+    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), tx, 14, &actual, 1000);
+
+    while (payload_len < 4) {
+        ret = usb_bulk_msg(udev, usb_rcvbulkpipe(udev, 3), rx, 512, &actual, 1000);
+        if (ret || actual < 2) break;
+        
+        for (i = 2; i < actual && payload_len < 4; i++) {
+            payload[payload_len++] = rx[i];
+        }
+    }
+
+    if (payload_len == 4) {
+        val = ((payload[0] << 24) | (payload[1] << 16) | (payload[2] << 8) | payload[3]) >> 7;
+    }
+
     kfree(tx); 
     kfree(rx);
+
+    if (payload_len < 4) return -EIO;
     return sprintf(buf, "%u\n", val);
 }
 
@@ -104,20 +109,19 @@ static int quadra_usb_probe(struct usb_interface *intf, const struct usb_device_
     if (intf->cur_altsetting->desc.bInterfaceNumber != 1) return -ENODEV;
     udev = interface_to_usbdev(intf);
 
-    // Wymuszenie indeksu 2 - przekierowanie instrukcji sprzętowych do Kanału B
     usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0, 0x40, 0, 2, NULL, 0, 1000);
     usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 9, 0x40, 1, 2, NULL, 0, 1000);
     usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0x0B, 0x40, 0x020B, 2, NULL, 0, 1000);
 
-    init_tx = kmalloc(16, GFP_KERNEL);
+    init_tx = kmalloc(32, GFP_KERNEL);
     if (init_tx) {
         int i = 0;
-        init_tx[i++] = 0x8A; // Wyłączenie dzielnika bazowego /5
-        init_tx[i++] = 0x97; // Wyłączenie adaptacyjnego taktowania
-        init_tx[i++] = 0x8D; // Wyłączenie zegara 3-fazowego
-        init_tx[i++] = 0x86; init_tx[i++] = 0x02; init_tx[i++] = 0x00; // Inicjalizacja TCK na 10 MHz
-        init_tx[i++] = 0x80; init_tx[i++] = 0x08; init_tx[i++] = 0x0B; // Ustawienie CS w stan wysoki
-        send_mpsse(init_tx, i);
+        init_tx[i++] = 0x8A; 
+        init_tx[i++] = 0x97; 
+        init_tx[i++] = 0x8D; 
+        init_tx[i++] = 0x86; init_tx[i++] = 0x1D; init_tx[i++] = 0x00; 
+        init_tx[i++] = 0x80; init_tx[i++] = 0x08; init_tx[i++] = 0x0B; 
+        usb_bulk_msg(udev, usb_sndbulkpipe(udev, 4), init_tx, i, NULL, 1000);
         kfree(init_tx);
     }
 
