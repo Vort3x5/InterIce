@@ -1,0 +1,5 @@
+set_io clk J3
+set_io cs_n M1
+set_io sck L1
+set_io mosi K1
+set_io miso K3

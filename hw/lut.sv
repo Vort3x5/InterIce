@@ -1,0 +1,142 @@
+`include "quadra.vh"
+module lut
+(
+    input  x1_t  x1,
+    output a_t   a,
+    output b_t   b,
+    output c_t   c
+);
+    always_comb begin
+        case (x1)
+            7'd0: begin a = 21'h14afb1; b = 17'h5a85; c = 10'h164; end
+            7'd1: begin a = 21'h150b99; b = 17'h5d4d; c = 10'h159; end
+            7'd2: begin a = 21'h156a3f; b = 17'h5fff; c = 10'h14d; end
+            7'd3: begin a = 21'h15cb8a; b = 17'h6298; c = 10'h140; end
+            7'd4: begin a = 21'h162f62; b = 17'h6519; c = 10'h134; end
+            7'd5: begin a = 21'h1695af; b = 17'h6780; c = 10'h127; end
+            7'd6: begin a = 21'h16fe56; b = 17'h69ce; c = 10'h11a; end
+            7'd7: begin a = 21'h17693d; b = 17'h6c01; c = 10'h10c; end
+            7'd8: begin a = 21'h17d64a; b = 17'h6e19; c = 10'hfe; end
+            7'd9: begin a = 21'h184561; b = 17'h7016; c = 10'hf0; end
+            7'd10: begin a = 21'h18b667; b = 17'h71f6; c = 10'he2; end
+            7'd11: begin a = 21'h19293f; b = 17'h73bb; c = 10'hd4; end
+            7'd12: begin a = 21'h199dcd; b = 17'h7562; c = 10'hc5; end
+            7'd13: begin a = 21'h1a13f3; b = 17'h76ec; c = 10'hb6; end
+            7'd14: begin a = 21'h1a8b95; b = 17'h7858; c = 10'ha7; end
+            7'd15: begin a = 21'h1b0493; b = 17'h79a6; c = 10'h98; end
+            7'd16: begin a = 21'h1b7ed0; b = 17'h7ad5; c = 10'h88; end
+            7'd17: begin a = 21'h1bfa2e; b = 17'h7be6; c = 10'h79; end
+            7'd18: begin a = 21'h1c768d; b = 17'h7cd8; c = 10'h69; end
+            7'd19: begin a = 21'h1cf3ce; b = 17'h7dab; c = 10'h5a; end
+            7'd20: begin a = 21'h1d71d2; b = 17'h7e5e; c = 10'h4a; end
+            7'd21: begin a = 21'h1df07a; b = 17'h7ef2; c = 10'h3a; end
+            7'd22: begin a = 21'h1e6fa6; b = 17'h7f66; c = 10'h2a; end
+            7'd23: begin a = 21'h1eef36; b = 17'h7fba; c = 10'h1a; end
+            7'd24: begin a = 21'h1f6f0a; b = 17'h7fee; c = 10'ha; end
+            7'd25: begin a = 21'h1fef02; b = 17'h8003; c = 10'h3fa; end
+            7'd26: begin a = 21'h6eff; b = 17'h7ff7; c = 10'h3ea; end
+            7'd27: begin a = 21'heedf; b = 17'h7fcb; c = 10'h3da; end
+            7'd28: begin a = 21'h16e85; b = 17'h7f80; c = 10'h3ca; end
+            7'd29: begin a = 21'h1edce; b = 17'h7f14; c = 10'h3ba; end
+            7'd30: begin a = 21'h26c9c; b = 17'h7e89; c = 10'h3ab; end
+            7'd31: begin a = 21'h2eacf; b = 17'h7dde; c = 10'h39b; end
+            7'd32: begin a = 21'h36847; b = 17'h7d13; c = 10'h38b; end
+            7'd33: begin a = 21'h3e4e5; b = 17'h7c2a; c = 10'h37c; end
+            7'd34: begin a = 21'h4608a; b = 17'h7b21; c = 10'h36c; end
+            7'd35: begin a = 21'h4db17; b = 17'h79f9; c = 10'h35d; end
+            7'd36: begin a = 21'h5546d; b = 17'h78b3; c = 10'h34e; end
+            7'd37: begin a = 21'h5cc6e; b = 17'h774f; c = 10'h33f; end
+            7'd38: begin a = 21'h642fc; b = 17'h75cd; c = 10'h330; end
+            7'd39: begin a = 21'h6b7f9; b = 17'h742e; c = 10'h322; end
+            7'd40: begin a = 21'h72b48; b = 17'h7271; c = 10'h313; end
+            7'd41: begin a = 21'h79ccc; b = 17'h7098; c = 10'h305; end
+            7'd42: begin a = 21'h80c6a; b = 17'h6ea3; c = 10'h2f8; end
+            7'd43: begin a = 21'h87a04; b = 17'h6c92; c = 10'h2ea; end
+            7'd44: begin a = 21'h8e580; b = 17'h6a66; c = 10'h2dd; end
+            7'd45: begin a = 21'h94ec2; b = 17'h681f; c = 10'h2d0; end
+            7'd46: begin a = 21'h9b5b1; b = 17'h65bf; c = 10'h2c3; end
+            7'd47: begin a = 21'ha1a32; b = 17'h6345; c = 10'h2b7; end
+            7'd48: begin a = 21'ha7c2d; b = 17'h60b2; c = 10'h2aa; end
+            7'd49: begin a = 21'hadb89; b = 17'h5e07; c = 10'h29f; end
+            7'd50: begin a = 21'hb382e; b = 17'h5b44; c = 10'h293; end
+            7'd51: begin a = 21'hb9205; b = 17'h586b; c = 10'h288; end
+            7'd52: begin a = 21'hbe8f8; b = 17'h557b; c = 10'h27e; end
+            7'd53: begin a = 21'hc3cf1; b = 17'h5276; c = 10'h273; end
+            7'd54: begin a = 21'hc8dda; b = 17'h4f5d; c = 10'h269; end
+            7'd55: begin a = 21'hcdba0; b = 17'h4c2f; c = 10'h260; end
+            7'd56: begin a = 21'hd262f; b = 17'h48ef; c = 10'h257; end
+            7'd57: begin a = 21'hd6d74; b = 17'h459c; c = 10'h24e; end
+            7'd58: begin a = 21'hdb15f; b = 17'h4238; c = 10'h246; end
+            7'd59: begin a = 21'hdf1dd; b = 17'h3ec4; c = 10'h23e; end
+            7'd60: begin a = 21'he2ede; b = 17'h3b40; c = 10'h237; end
+            7'd61: begin a = 21'he6854; b = 17'h37ad; c = 10'h230; end
+            7'd62: begin a = 21'he9e30; b = 17'h340c; c = 10'h229; end
+            7'd63: begin a = 21'hed065; b = 17'h305e; c = 10'h223; end
+            7'd64: begin a = 21'hefee5; b = 17'h2ca4; c = 10'h21d; end
+            7'd65: begin a = 21'hf29a6; b = 17'h28de; c = 10'h218; end
+            7'd66: begin a = 21'hf509d; b = 17'h250f; c = 10'h214; end
+            7'd67: begin a = 21'hf73bf; b = 17'h2136; c = 10'h210; end
+            7'd68: begin a = 21'hf9305; b = 17'h1d55; c = 10'h20c; end
+            7'd69: begin a = 21'hfae66; b = 17'h196d; c = 10'h209; end
+            7'd70: begin a = 21'hfc5db; b = 17'h157e; c = 10'h206; end
+            7'd71: begin a = 21'hfd95f; b = 17'h118a; c = 10'h204; end
+            7'd72: begin a = 21'hfe8ed; b = 17'hd92; c = 10'h202; end
+            7'd73: begin a = 21'hff481; b = 17'h996; c = 10'h201; end
+            7'd74: begin a = 21'hffc17; b = 17'h597; c = 10'h200; end
+            7'd75: begin a = 21'hfffaf; b = 17'h198; c = 10'h200; end
+            7'd76: begin a = 21'hfff47; b = 17'h1fd98; c = 10'h200; end
+            7'd77: begin a = 21'hffadf; b = 17'h1f998; c = 10'h201; end
+            7'd78: begin a = 21'hff278; b = 17'h1f59a; c = 10'h202; end
+            7'd79: begin a = 21'hfe615; b = 17'h1f19f; c = 10'h204; end
+            7'd80: begin a = 21'hfd5b8; b = 17'h1eda8; c = 10'h207; end
+            7'd81: begin a = 21'hfc167; b = 17'h1e9b4; c = 10'h209; end
+            7'd82: begin a = 21'hfa924; b = 17'h1e5c7; c = 10'h20d; end
+            7'd83: begin a = 21'hf8cf8; b = 17'h1e1e0; c = 10'h210; end
+            7'd84: begin a = 21'hf6ce8; b = 17'h1de01; c = 10'h215; end
+            7'd85: begin a = 21'hf48fe; b = 17'h1da2a; c = 10'h219; end
+            7'd86: begin a = 21'hf2141; b = 17'h1d65c; c = 10'h21f; end
+            7'd87: begin a = 21'hef5bc; b = 17'h1d299; c = 10'h224; end
+            7'd88: begin a = 21'hec679; b = 17'h1cee2; c = 10'h22a; end
+            7'd89: begin a = 21'he9385; b = 17'h1cb36; c = 10'h231; end
+            7'd90: begin a = 21'he5ced; b = 17'h1c798; c = 10'h238; end
+            7'd91: begin a = 21'he22bd; b = 17'h1c408; c = 10'h23f; end
+            7'd92: begin a = 21'hde504; b = 17'h1c087; c = 10'h247; end
+            7'd93: begin a = 21'hda3d2; b = 17'h1bd15; c = 10'h250; end
+            7'd94: begin a = 21'hd5f38; b = 17'h1b9b5; c = 10'h259; end
+            7'd95: begin a = 21'hd1745; b = 17'h1b666; c = 10'h262; end
+            7'd96: begin a = 21'hccc0d; b = 17'h1b329; c = 10'h26b; end
+            7'd97: begin a = 21'hc7da2; b = 17'h1b000; c = 10'h275; end
+            7'd98: begin a = 21'hc2c18; b = 17'h1aceb; c = 10'h280; end
+            7'd99: begin a = 21'hbd783; b = 17'h1a9ea; c = 10'h28a; end
+            7'd100: begin a = 21'hb7ff7; b = 17'h1a6ff; c = 10'h296; end
+            7'd101: begin a = 21'hb258c; b = 17'h1a42a; c = 10'h2a1; end
+            7'd102: begin a = 21'hac858; b = 17'h1a16c; c = 10'h2ad; end
+            7'd103: begin a = 21'ha6871; b = 17'h19ec6; c = 10'h2b9; end
+            7'd104: begin a = 21'ha05f1; b = 17'h19c38; c = 10'h2c6; end
+            7'd105: begin a = 21'h9a0ef; b = 17'h199c3; c = 10'h2d2; end
+            7'd106: begin a = 21'h93985; b = 17'h19768; c = 10'h2df; end
+            7'd107: begin a = 21'h8cfcc; b = 17'h19527; c = 10'h2ed; end
+            7'd108: begin a = 21'h863e0; b = 17'h19300; c = 10'h2fa; end
+            7'd109: begin a = 21'h7f5db; b = 17'h190f5; c = 10'h308; end
+            7'd110: begin a = 21'h785d8; b = 17'h18f05; c = 10'h316; end
+            7'd111: begin a = 21'h713f4; b = 17'h18d32; c = 10'h325; end
+            7'd112: begin a = 21'h6a04b; b = 17'h18b7b; c = 10'h333; end
+            7'd113: begin a = 21'h62afa; b = 17'h189e2; c = 10'h342; end
+            7'd114: begin a = 21'h5b41e; b = 17'h18866; c = 10'h351; end
+            7'd115: begin a = 21'h53bd5; b = 17'h18708; c = 10'h360; end
+            7'd116: begin a = 21'h4c23d; b = 17'h185c8; c = 10'h36f; end
+            7'd117: begin a = 21'h44775; b = 17'h184a7; c = 10'h37f; end
+            7'd118: begin a = 21'h3cb9b; b = 17'h183a4; c = 10'h38e; end
+            7'd119: begin a = 21'h34ece; b = 17'h182c1; c = 10'h39e; end
+            7'd120: begin a = 21'h2d12d; b = 17'h181fd; c = 10'h3ae; end
+            7'd121: begin a = 21'h252d8; b = 17'h18158; c = 10'h3be; end
+            7'd122: begin a = 21'h1d3ee; b = 17'h180d4; c = 10'h3cd; end
+            7'd123: begin a = 21'h15490; b = 17'h1806e; c = 10'h3dd; end
+            7'd124: begin a = 21'hd4dc; b = 17'h18029; c = 10'h3ed; end
+            7'd125: begin a = 21'h54f3; b = 17'h18004; c = 10'h3fd; end
+            7'd126: begin a = 21'h1fd4f5; b = 17'h17fff; c = 10'hd; end
+            7'd127: begin a = 21'h1f5501; b = 17'h1801a; c = 10'h1d; end
+            default: begin a = '0; b = '0; c = '0; end
+        endcase
+    end
+endmodule
