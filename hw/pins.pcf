@@ -2,4 +2,4 @@ set_io clk J3
 set_io sck B10
 set_io mosi B12
 set_io miso B13
-set_io cs_n B14
+set_io cs_n A15
